@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from app import app
 from models import db, Cupcake
+from flask import jsonify
 
 # Use test database and don't clutter tests with SQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///cupcakes_test'
@@ -9,6 +10,8 @@ app.config['SQLALCHEMY_ECHO'] = False
 
 # Make Flask errors be real errors, rather than HTML pages with error info
 app.config['TESTING'] = True
+
+app.app_context().push()
 
 db.drop_all()
 db.create_all()
@@ -107,3 +110,24 @@ class CupcakeViewsTestCase(TestCase):
             })
 
             self.assertEqual(Cupcake.query.count(), 2)
+
+    def test_patch_cupcake(self):
+        with app.test_client() as client:
+            url = "/api/cupcakes/1"
+            resp = client.patch(url, json=CUPCAKE_DATA_2)
+
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json
+            self.assertEqual(data['cupcake']['flavor'], CUPCAKE_DATA_2['flavor'])
+
+    def test_delete_cupcake(self):
+        with app.test_client() as client:
+             url = "/api/cupcakes/1"
+             resp = client.delete(url)
+
+             self.assertEqual(resp.status_code, 200)
+             data = resp.json
+             
+             self.assertIn('deleted', data)
+             deleted = Cupcake.query.get(1)
+             self.assertEqual(deleted, None)

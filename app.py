@@ -8,7 +8,7 @@ import pdb
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{secret}@localhost/cupcake'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{secret}@localhost/cupcakes_test'
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
@@ -49,10 +49,12 @@ def add_cupcake():
     cd = request.json
     cupcake = Cupcake(flavor=cd['flavor'], size=cd['size'], rating=cd['rating'])
     if 'image' in cd:
-        cupcake.image = cd.image
+        cupcake.image = cd['image']
     db.session.add(cupcake)
     db.session.commit()
-    return jsonify(cupcake=request.json)
+    db.session.refresh(cupcake)
+    res = dictify(cupcake.__dict__)
+    return (jsonify(cupcake=res), 201)
 
 @app.route('/api/cupcakes/<int:cupcake_id>', methods=['patch'])
 def update_cupcake(cupcake_id):
