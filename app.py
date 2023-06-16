@@ -8,7 +8,7 @@ import pdb
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{secret}@localhost/cupcakes_test'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{secret}@localhost/cupcake'
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
@@ -27,6 +27,10 @@ def dictify(cupcake):
         'rating': cupcake['rating'],
         'image': cupcake['image']
     }
+
+@app.route('/')
+def home():
+    return render_template('base.html')
 
 @app.route('/api/cupcakes')
 def all_cupcakes():
